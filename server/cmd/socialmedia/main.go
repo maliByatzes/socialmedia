@@ -1,13 +1,21 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+
+	"github.com/maliByatzes/socialmedia/config"
+	"github.com/maliByatzes/socialmedia/postgres"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run()
+  cfg, err := config.NewConfig()
+  if err != nil {
+    log.Fatalf("cannot create new config: %v", err)
+  }
+
+  db := postgres.NewDB(cfg.DBURL)
+  if err := db.Open(); err != nil {
+    log.Fatalf("cannot open database: %v", err)
+  }
+  defer db.Close()
 }
