@@ -8,14 +8,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	sm "github.com/maliByatzes/socialmedia"
 	"github.com/maliByatzes/socialmedia/postgres"
 )
 
 const Timeout = 5 * time.Second
 
 type Server struct {
-	Server *http.Server
-	Router *gin.Engine
+	Server      *http.Server
+	Router      *gin.Engine
+	UserService sm.UserService
 }
 
 func NewServer(db *postgres.DB) *Server {
@@ -28,8 +30,9 @@ func NewServer(db *postgres.DB) *Server {
 		Router: gin.Default(),
 	}
 
-  s.routes()
-  s.Server.Handler = s.Router
+	s.routes()
+	s.UserService = postgres.NewUserService(db)
+	s.Server.Handler = s.Router
 
 	return &s
 }

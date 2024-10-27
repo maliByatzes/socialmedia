@@ -54,7 +54,7 @@ func createUser(ctx context.Context, tx *Tx, user *sm.User) error {
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return fmt.Errorf("user: this email is already exists.")
+			return sm.Errorf(sm.ECONFLICT, "this email is already exists.")
 		default:
 			return err
 		}

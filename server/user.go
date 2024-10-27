@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -23,20 +25,35 @@ type User struct {
 
 func (u *User) Validate() error {
 	if u.Name == "" {
-		return fmt.Errorf("user: name is required.")
+		return Errorf(EINVALID, "name is required.")
 	}
 
 	if u.Email == "" {
-		return fmt.Errorf("user: email is required.")
+		return Errorf(EINVALID, "email is required.")
 	}
 
 	if u.Password == "" {
-		return fmt.Errorf("user: password is required.")
+		return Errorf(EINVALID, "password is required.")
 	}
 
 	return nil
 }
 
+func (u *User) SetPassword(password string) error {
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	u.Password = string(hashBytes)
+
+	return nil
+}
+
+func (u *User) VerifyPassword(password string, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
 type UserService interface {
-  CreateUser(ctx context.Context, user *User) error
+	CreateUser(ctx context.Context, user *User) error
 }
