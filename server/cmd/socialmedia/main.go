@@ -5,6 +5,7 @@ import (
 
 	"github.com/maliByatzes/socialmedia/config"
 	"github.com/maliByatzes/socialmedia/postgres"
+	"github.com/maliByatzes/socialmedia/http"
 )
 
 func main() {
@@ -18,4 +19,8 @@ func main() {
     log.Fatalf("cannot open database: %v", err)
   }
   defer db.Close()
+
+  srv := http.NewServer(db)
+  defer srv.Close()
+  log.Fatal(srv.Run(cfg.Port))
 }
