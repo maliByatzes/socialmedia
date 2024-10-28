@@ -2,7 +2,6 @@ package socialmedia
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"

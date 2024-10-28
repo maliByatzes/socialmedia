@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 
 	sm "github.com/maliByatzes/socialmedia"
 )

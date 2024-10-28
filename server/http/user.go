@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ func (s *Server) addUser() gin.HandlerFunc {
 			Name           string `json:"name" binding:"required,min=3"`
 			Email          string `json:"email" binding:"required,email"`
 			Password       string `json:"password" binding:"required,min=8,max=72"`
-			IsConsentGiven bool   `json:"is_consent_given" binding:"required"`
+			IsConsentGiven string `json:"is_consent_given" binding:"required"`
 		} `json:"user" binding:"required"`
 	}
 
@@ -27,6 +28,14 @@ func (s *Server) addUser() gin.HandlerFunc {
 			})
 			return
 		}
+
+    isConsentGiven, err := strconv.ParseBool(req.User.IsConsentGiven)
+    if err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{
+        "error": err.Error(),
+      })
+      return
+    }
 
 		newUser := sm.User{
 			Name:  req.User.Name,
@@ -62,13 +71,17 @@ func (s *Server) addUser() gin.HandlerFunc {
 			return
 		}
 
-		if req.User.IsConsentGiven {
-			c.Next()
-		} else {
+		if !isConsentGiven {
 			c.JSON(http.StatusCreated, gin.H{
-				"message": "User added successfully",
+				"message": "User added successfully w/o consent",
 				"user":    newUser,
 			})
+		} else {
+			c.JSON(http.StatusCreated, gin.H{
+				"message": "User added successfully w/ consent",
+				"user":    newUser,
+			})
+			// c.Next()
 		}
 	}
 }
