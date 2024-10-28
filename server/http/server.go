@@ -15,9 +15,10 @@ import (
 const Timeout = 5 * time.Second
 
 type Server struct {
-	Server      *http.Server
-	Router      *gin.Engine
-	UserService sm.UserService
+	Server       *http.Server
+	Router       *gin.Engine
+	UserService  sm.UserService
+	EmailService sm.EmailService
 }
 
 func NewServer(db *postgres.DB) *Server {
@@ -32,6 +33,7 @@ func NewServer(db *postgres.DB) *Server {
 
 	s.routes()
 	s.UserService = postgres.NewUserService(db)
+  s.EmailService = postgres.NewEmailService(db)
 	s.Server.Handler = s.Router
 
 	return &s

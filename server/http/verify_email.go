@@ -7,11 +7,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	sm "github.com/maliByatzes/socialmedia"
 	"github.com/maliByatzes/socialmedia/config"
 	"github.com/maliByatzes/socialmedia/mail"
 )
 
-func sendVerificationEmail() gin.HandlerFunc {
+func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -32,13 +33,24 @@ func sendVerificationEmail() gin.HandlerFunc {
 		content := verifyEmailHTML(string(name), verificationLink, verificationCode)
 		sender.SendEmail("Verify your email address", content, []string{email}, nil, nil)
 
-		// create a new verification
+		newEmailVerification := sm.Email{
+			Email:            email,
+			VerificationCode: fmt.Sprintf("%d", verificationCode),
+			For:              "signup",
+		}
 
-		// and then return
+		if err := s.EmailService.CreateEmailVerification(c.Request.Context(), &newEmailVerification); err != nil {
+			log.Printf("error in create email verification: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Verification email successfully sent.",
 		})
+		return
 	}
 }
 

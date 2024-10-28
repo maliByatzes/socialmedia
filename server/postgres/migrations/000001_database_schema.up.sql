@@ -215,10 +215,11 @@ CREATE TABLE IF NOT EXISTS "configs" (
 CREATE TABLE IF NOT EXISTS "emails" (
   "id" SERIAL NOT NULL,
   "email" VARCHAR(255),
-  "verficationCode" VARCHAR(100),
-  "messageId" VARCHAR(255),
+  "verification_code" VARCHAR(100),
+  "message_id" VARCHAR(255),
   "for" VARCHAR(255),
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "expires_at" TIMESTAMPTZ NOT NULL,
   CONSTRAINT "emails_pkey" PRIMARY KEY ("id")
 );
 
