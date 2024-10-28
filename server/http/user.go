@@ -77,11 +77,9 @@ func (s *Server) addUser() gin.HandlerFunc {
 				"user":    newUser,
 			})
 		} else {
-			c.JSON(http.StatusCreated, gin.H{
-				"message": "User added successfully w/ consent",
-				"user":    newUser,
-			})
-			// c.Next()
+      c.Set("email", req.User.Email)
+      c.Set("name", req.User.Name)
+			c.Next()
 		}
 	}
 }
