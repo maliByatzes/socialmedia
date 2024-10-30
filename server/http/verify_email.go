@@ -46,11 +46,6 @@ func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 			})
 			return
 		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Verification email successfully sent.",
-		})
-		return
 	}
 }
 

@@ -29,13 +29,13 @@ func (s *Server) addUser() gin.HandlerFunc {
 			return
 		}
 
-    isConsentGiven, err := strconv.ParseBool(req.User.IsConsentGiven)
-    if err != nil {
-      c.JSON(http.StatusBadRequest, gin.H{
-        "error": err.Error(),
-      })
-      return
-    }
+		isConsentGiven, err := strconv.ParseBool(req.User.IsConsentGiven)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
 
 		newUser := sm.User{
 			Name:  req.User.Name,
@@ -76,10 +76,17 @@ func (s *Server) addUser() gin.HandlerFunc {
 				"message": "User added successfully w/o consent",
 				"user":    newUser,
 			})
+      return
 		} else {
-      c.Set("email", req.User.Email)
-      c.Set("name", req.User.Name)
+			c.Set("email", req.User.Email)
+			c.Set("name", req.User.Name)
+
 			c.Next()
 		}
+
+    c.JSON(http.StatusOK, gin.H{
+		  "message": "Verification email successfully sent.",
+      "user": newUser,
+		})
 	}
 }
