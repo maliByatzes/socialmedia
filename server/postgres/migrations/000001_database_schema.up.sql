@@ -128,6 +128,25 @@ CREATE TABLE IF NOT EXISTS "pending_posts" (
   CONSTRAINT "pending_posts_pkey" PRIMARY KEY ("id")
 );
 
+-- Context table
+CREATE TABLE IF NOT EXISTS "context" (
+  "id" SERIAL NOT NULL,
+  "user_id" INTEGER,
+  "email" VARCHAR(255),
+  "ip" VARCHAR(45),
+  "country" VARCHAR(100),
+  "city" VARCHAR(100),
+  "browser" VARCHAR(255),
+  "platform" VARCHAR(255),
+  "os" VARCHAR(100),
+  "device" VARCHAR(255),
+  "device_type" VARCHAR(255),
+  "is_trusted" BOOLEAN DEFAULT FALSE,
+  "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMPTZ NOT NULL,
+  CONSTRAINT "context_pkey" PRIMARY KEY ("id")
+);
+
 -- Suspicious logins table
 CREATE TABLE IF NOT EXISTS "suspicious_logins" (
   "id" SERIAL NOT NULL,
@@ -257,7 +276,9 @@ ALTER TABLE "reports" ADD CONSTRAINT "reports_reported_by_fkey" FOREIGN KEY ("re
 ALTER TABLE "pending_posts" ADD CONSTRAINT "pending_posts_community_id_fkey" FOREIGN KEY ("community_id") REFERENCES "communities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "pending_posts" ADD CONSTRAINT "pending_posts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
-ALTER TABLE "suspicious_logins" ADD CONSTRAINT "suspicious_logins_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "context" ADD CONSTRAINT "context_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "suspicious_logins" ADD CONSTRAINT "suspicious_logins_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "preferences" ADD CONSTRAINT "preferences_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 

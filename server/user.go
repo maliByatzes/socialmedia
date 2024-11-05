@@ -11,7 +11,7 @@ type User struct {
 	ID              uint      `json:"id"`
 	Name            string    `json:"name"`
 	Email           string    `json:"email"`
-	Password        string    `json:"password"`
+  Password        string    `json:"-" db:"password"`
 	Avatar          string    `json:"avatar"`
 	Location        string    `json:"location"`
 	Bio             string    `json:"bio"`

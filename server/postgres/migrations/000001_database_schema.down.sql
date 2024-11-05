@@ -1,6 +1,8 @@
 ALTER TABLE "admin_tokens" DROP CONSTRAINT IF EXISTS "admin_tokens_admin_id_fkey";
 ALTER TABLE "tokens" DROP CONSTRAINT IF EXISTS "tokens_user_id_fkey";
 ALTER TABLE "preferences" DROP CONSTRAINT IF EXISTS "preferences_user_id_fkey";
+ALTER TABLE "suspicious_logins" DROP CONSTRAINT IF EXISTS "suspicious_logins_user_id_fkey";
+ALTER TABLE "context" DROP CONSTRAINT IF EXISTS "context_user_id_fkey";
 ALTER TABLE "pending_posts" DROP CONSTRAINT IF EXISTS "pending_posts_user_id_fkey";
 ALTER TABLE "pending_posts" DROP CONSTRAINT IF EXISTS "pending_posts_community_id_fkey";
 ALTER TABLE "reports" DROP CONSTRAINT IF EXISTS "reports_reported_by_fkey";
@@ -32,6 +34,7 @@ DROP TABLE IF EXISTS "admin_tokens";
 DROP TABLE IF EXISTS "admins";
 DROP TABLE IF EXISTS "tokens";
 DROP TABLE IF EXISTS "preferences";
+DROP TABLE IF EXISTS "context";
 DROP TABLE IF EXISTS "suspicious_logins";
 DROP TABLE IF EXISTS "pending_posts";
 DROP TABLE IF EXISTS "reports";

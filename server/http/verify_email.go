@@ -19,7 +19,10 @@ func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		emailAny, _ := c.Get("email")
+		emailAny, exists := c.Get("email")
+    if !exists {
+      return
+    }
 		nameAny, _ := c.Get("name")
 
 		email := fmt.Sprintf("%v", emailAny)
@@ -46,6 +49,10 @@ func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 			})
 			return
 		}
+
+    c.JSON(http.StatusOK, gin.H{
+      "message": "Email verification sent successfully",
+    })
 	}
 }
 

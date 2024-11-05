@@ -77,16 +77,11 @@ func (s *Server) addUser() gin.HandlerFunc {
 				"user":    newUser,
 			})
       return
-		} else {
-			c.Set("email", req.User.Email)
-			c.Set("name", req.User.Name)
-
-			c.Next()
 		}
 
-    c.JSON(http.StatusOK, gin.H{
-		  "message": "Verification email successfully sent.",
-      "user": newUser,
-		})
+    c.Set("email", req.User.Email)
+		c.Set("name", req.User.Name)
+
+		// c.Next()
 	}
 }
