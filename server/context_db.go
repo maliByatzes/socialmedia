@@ -22,6 +22,14 @@ type Context struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
+func (c *Context) Validate() error {
+	if c.UserID == 0 {
+		return Errorf(EINVALID, "UserID is required.")
+	}
+
+	return nil
+}
+
 type ContextService interface {
 	FindContexts(ctx context.Context, filter ContextFilter) ([]*Context, int, error)
 	FindContextByID(ctx context.Context, id uint) (*Context, error)

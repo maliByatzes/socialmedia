@@ -66,6 +66,36 @@ func (s *ContextService) DeleteContext(ctx context.Context, id uint) error {
 }
 
 func createContext(ctx context.Context, tx *Tx, context *sm.Context) error {
+	context.CreatedAt = tx.now
+	context.UpdatedAt = context.CreatedAt
+
+	if err := context.Validate(); err != nil {
+		return err
+	}
+
+	query := `INSERT INTO "context" ("user_id", "email", "ip", "country", "city", "browser", "platform", "os", "device", "device_type", "is_trusted", "created_at", "updated_at") 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`
+	args := []interface{}{
+		context.UserID,
+		context.Email,
+		context.IP,
+		context.Country,
+		context.City,
+		context.Browser,
+		context.Platform,
+		context.OS,
+		context.Device,
+		context.DeviceType,
+		context.IsTrusted,
+		(*NullTime)(&context.CreatedAt),
+		(*NullTime)(&context.UpdatedAt),
+	}
+
+	err := tx.QueryRowxContext(ctx, query, args...).Scan(&context.ID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
