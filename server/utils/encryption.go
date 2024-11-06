@@ -2,11 +2,11 @@ package utils
 
 import (
 	"crypto/aes"
-	"fmt"
+	"log"
 	"os"
 )
 
-func encryptData(data []byte) (string, error) {
+func EncryptData(data []byte) string {
 	key, ok := os.LookupEnv("CRYTO_KEY")
 	if !ok {
 		panic("CRYPTO_KEY is not set!")
@@ -14,17 +14,19 @@ func encryptData(data []byte) (string, error) {
 
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
-		return "", fmt.Errorf("failed to create new cipher: %v", err)
+		// NOTE: panic here for some reason
+		log.Println("%w", err)
+		panic("failed to create new cipher")
 	}
 
 	var encryptedData []byte
 
 	block.Encrypt(encryptedData, data)
 
-	return string(encryptedData), nil
+	return string(encryptedData)
 }
 
-func decryptData(data []byte) (string, error) {
+func DecryptData(data []byte) string {
 	key, ok := os.LookupEnv("CRYTO_KEY")
 	if !ok {
 		panic("CRYPTO_KEY is not set!")
@@ -32,12 +34,14 @@ func decryptData(data []byte) (string, error) {
 
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
-		return "", fmt.Errorf("failed to create new cipher: %v", err)
+		// NOTE: panic here for some reason
+		log.Println("%w", err)
+		panic("failed to create new cipher")
 	}
 
 	var decryptedData []byte
 
 	block.Decrypt(decryptedData, data)
 
-	return string(decryptedData), nil
+	return string(decryptedData)
 }

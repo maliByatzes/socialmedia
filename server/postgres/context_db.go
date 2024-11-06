@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	sm "github.com/maliByatzes/socialmedia"
+	"github.com/maliByatzes/socialmedia/utils"
 )
 
 type ContextService struct {
@@ -78,14 +79,14 @@ func createContext(ctx context.Context, tx *Tx, context *sm.Context) error {
 	args := []interface{}{
 		context.UserID,
 		context.Email,
-		context.IP,
-		context.Country,
-		context.City,
-		context.Browser,
-		context.Platform,
-		context.OS,
-		context.Device,
-		context.DeviceType,
+		utils.EncryptData([]byte(context.IP)),
+		utils.EncryptData([]byte(context.Country)),
+		utils.EncryptData([]byte(context.City)),
+		utils.EncryptData([]byte(context.Browser)),
+		utils.EncryptData([]byte(context.Platform)),
+		utils.EncryptData([]byte(context.OS)),
+		utils.EncryptData([]byte(context.Device)),
+		utils.EncryptData([]byte(context.DeviceType)),
 		context.IsTrusted,
 		(*NullTime)(&context.CreatedAt),
 		(*NullTime)(&context.UpdatedAt),
@@ -176,7 +177,6 @@ func findContexts(ctx context.Context, tx *Tx, filter sm.ContextFilter) (_ []*sm
 	}
 	defer rows.Close()
 
-	// TODO: decrypt fields coz they'll be encrypted
 	contexts := make([]*sm.Context, 0)
 	for rows.Next() {
 		var context sm.Context
@@ -199,6 +199,16 @@ func findContexts(ctx context.Context, tx *Tx, filter sm.ContextFilter) (_ []*sm
 		); err != nil {
 			return nil, n, err
 		}
+
+		// NOTE: Will this even work?? IDK we'll see
+		context.IP = utils.DecryptData([]byte(context.IP))
+		context.Country = utils.DecryptData([]byte(context.Country))
+		context.City = utils.DecryptData([]byte(context.City))
+		context.Browser = utils.DecryptData([]byte(context.Browser))
+		context.Platform = utils.DecryptData([]byte(context.Platform))
+		context.OS = utils.DecryptData([]byte(context.OS))
+		context.Device = utils.DecryptData([]byte(context.Device))
+		context.DeviceType = utils.DecryptData([]byte(context.DeviceType))
 
 		contexts = append(contexts, &context)
 	}
