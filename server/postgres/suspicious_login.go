@@ -31,7 +31,7 @@ func (s *SuspiciousLoginService) FindSLByUserID(ctx context.Context, userID uint
 	tx := s.db.BeginTx(ctx, nil)
 	defer tx.Rollback()
 
-	sl, err := findSLByID(ctx, tx, userID)
+	sl, err := findSLByUserID(ctx, tx, userID)
 	if err != nil {
 		return nil, err
 	}
