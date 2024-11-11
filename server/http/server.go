@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	sm "github.com/maliByatzes/socialmedia"
 	"github.com/maliByatzes/socialmedia/postgres"
+	"github.com/maliByatzes/socialmedia/token"
 )
 
 const Timeout = 5 * time.Second
@@ -17,6 +18,7 @@ const Timeout = 5 * time.Second
 type Server struct {
 	Server                 *http.Server
 	Router                 *gin.Engine
+	TokenMaker             token.Maker
 	UserService            sm.UserService
 	EmailService           sm.EmailService
 	ContextService         sm.ContextService
@@ -24,7 +26,7 @@ type Server struct {
 	SuspiciousLoginService sm.SuspiciousLoginService
 }
 
-func NewServer(db *postgres.DB) *Server {
+func NewServer(db *postgres.DB, secretKey string) (*Server, error) {
 	s := Server{
 		Server: &http.Server{
 			WriteTimeout: Timeout,
@@ -34,6 +36,12 @@ func NewServer(db *postgres.DB) *Server {
 		Router: gin.Default(),
 	}
 
+	tkMaker, err := token.NewJWTMaker(secretKey)
+	if err != nil {
+		return nil, err
+	}
+	s.TokenMaker = tkMaker
+
 	s.routes()
 	s.UserService = postgres.NewUserService(db)
 	s.EmailService = postgres.NewEmailService(db)
@@ -42,7 +50,7 @@ func NewServer(db *postgres.DB) *Server {
 	s.SuspiciousLoginService = postgres.NewSuspiciousLoginService(db)
 	s.Server.Handler = s.Router
 
-	return &s
+	return &s, nil
 }
 
 func (s *Server) Run(port string) error {

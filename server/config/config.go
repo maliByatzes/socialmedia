@@ -11,8 +11,9 @@ type Config struct {
 	ClientURL string
 	DBURL     string
 	Port      string
+	SecretKey string
 
-	Email    string
+	Email         string
 	EmailPassword string
 }
 
@@ -32,21 +33,27 @@ func NewConfig() (Config, error) {
 		port = "8080"
 	}
 
-  email, ok := os.LookupEnv("EMAIL")
-  if !ok {
-    return Config{}, errors.New("error: EMAIL is not set!")
-  }
+	secretKey, ok := os.LookupEnv("SECRET_KEY")
+	if !ok {
+		return Config{}, errors.New("error: SECRET_KEY is not set!")
+	}
 
-  pass, ok := os.LookupEnv("EMAIL_PASSWORD")
-  if !ok {
-    return Config{}, errors.New("error: EMAIL_PASSWORD is not set!")
-  }
+	email, ok := os.LookupEnv("EMAIL")
+	if !ok {
+		return Config{}, errors.New("error: EMAIL is not set!")
+	}
 
-  return Config{
-    ClientURL: clientURL,
-    DBURL: dbURL,
-    Port: port,
-    Email: email,
-    EmailPassword: pass,
-  }, nil
+	pass, ok := os.LookupEnv("EMAIL_PASSWORD")
+	if !ok {
+		return Config{}, errors.New("error: EMAIL_PASSWORD is not set!")
+	}
+
+	return Config{
+		ClientURL:     clientURL,
+		DBURL:         dbURL,
+		Port:          port,
+		SecretKey:     secretKey,
+		Email:         email,
+		EmailPassword: pass,
+	}, nil
 }
