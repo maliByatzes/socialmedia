@@ -30,8 +30,9 @@ type PreferenceService interface {
 }
 
 type PreferenceFilter struct {
-	ID     *uint `json:"id"`
-	UserID *uint `json:"user_id"`
+	ID                      *uint `json:"id"`
+	UserID                  *uint `json:"user_id"`
+	EnabledContextBasedAuth *bool `json:"enable_context_based_auth"`
 
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"`

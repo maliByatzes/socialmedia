@@ -102,6 +102,11 @@ func findPreferences(ctx context.Context, tx *Tx, filter sm.PreferenceFilter) (_
 		where, args = append(where, fmt.Sprintf(`"user_id" = $%d`, argPosition)), append(args, *v)
 	}
 
+	if v := filter.EnabledContextBasedAuth; v != nil {
+		argPosition++
+		where, args = append(where, fmt.Sprintf(`"enabled_context_auth_enabled" = $%d`, argPosition)), append(args, *v)
+	}
+
 	query := `SELECT "id", "user_id", "enable_context_based_auth", "created_at", COUNT(*) OVER() FROM "preferences"` + formatWhereClause(where) +
 		` ORDER BY id ASC` + formatLimitOffset(filter.Limit, filter.Offset)
 

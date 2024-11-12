@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	sm "github.com/maliByatzes/socialmedia"
@@ -76,12 +77,90 @@ func (s *Server) addUser() gin.HandlerFunc {
 				"message": "User added successfully w/o consent",
 				"user":    newUser,
 			})
-      return
+			return
 		}
 
-    c.Set("email", req.User.Email)
+		c.Set("email", req.User.Email)
 		c.Set("name", req.User.Name)
 
-		// c.Next()
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "User added successfully",
+			"user":    newUser,
+		})
+
+		c.Next()
+	}
+}
+
+func (s *Server) signin() gin.HandlerFunc {
+	var req struct {
+		User struct {
+			Email    string `json:"email" binding:"required,email"`
+			Password string `json:"password" binding:"required"`
+		} `json:"user" binding:"required"`
+	}
+
+	return func(c *gin.Context) {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		user, err := s.UserService.Authenticate(c.Request.Context(), req.User.Email, req.User.Password)
+		if err != nil || user == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid credentials",
+			})
+			return
+		}
+
+		// NOTE: Implement auth context
+
+		accessToken, _, err := s.TokenMaker.CreateToken(
+			user.ID,
+			user.Name,
+			time.Hour*6,
+		)
+		if err != nil {
+			log.Printf("error in signin: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		refreshToken, _, err := s.TokenMaker.CreateToken(
+			user.ID,
+			user.Name,
+			time.Hour*168,
+		)
+		if err != nil {
+			log.Printf("error in signin: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		if err := s.TokenService.CreateToken(c.Request.Context(), &sm.Token{
+			UserID:       user.ID,
+			RefreshToken: refreshToken,
+			AccessToken:  accessToken,
+		}); err != nil {
+			log.Printf("error in create token in signin: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":            accessToken,
+			"refresh_token":           refreshToken,
+			"access_token_updated_at": time.Now(),
+			"user":                    user,
+		})
 	}
 }
