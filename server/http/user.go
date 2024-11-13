@@ -87,8 +87,6 @@ func (s *Server) addUser() gin.HandlerFunc {
 			"message": "User added successfully",
 			"user":    newUser,
 		})
-
-		c.Next()
 	}
 }
 
@@ -155,6 +153,9 @@ func (s *Server) signin() gin.HandlerFunc {
 			})
 			return
 		}
+
+		c.Set("email", req.User.Email)
+		c.Set("name", user.Name)
 
 		c.JSON(http.StatusOK, gin.H{
 			"access_token":            accessToken,
