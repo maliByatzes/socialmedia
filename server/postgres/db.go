@@ -71,6 +71,25 @@ type Tx struct {
 	now time.Time
 }
 
+type NullString string
+
+func (s *NullString) Scan(value interface{}) error {
+	if value == nil {
+		*(*string)(s) = ""
+	}
+
+	switch v := value.(type) {
+	case string:
+		*(*string)(s) = v
+	case nil:
+		*(*string)(s) = ""
+	default:
+		return fmt.Errorf("NullString: cannot scan type %T into NullString", value)
+	}
+
+	return nil
+}
+
 type NullTime time.Time
 
 func (n *NullTime) Scan(value interface{}) error {

@@ -30,15 +30,38 @@ func (s *UserService) CreateUser(ctx context.Context, user *sm.User) error {
 }
 
 func (s *UserService) FindUserByID(ctx context.Context, id uint) (*sm.User, error) {
-	return nil, sm.Errorf(sm.ENOTIMPLEMENTED, "")
+	tx := s.db.BeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	user, err := findUserByID(ctx, tx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *UserService) Authenticate(ctx context.Context, email, password string) (*sm.User, error) {
-	return nil, sm.Errorf(sm.ENOTIMPLEMENTED, "")
+	tx := s.db.BeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	user, err := findUserByEmail(ctx, tx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := user.VerifyPassword(password); err != nil {
+		return nil, &sm.Error{Code: sm.ENOTAUTHORIZED, Message: "Invalid credentials"}
+	}
+
+	return user, nil
 }
 
 func (s *UserService) FindUsers(ctx context.Context, filter sm.UserFilter) ([]*sm.User, int, error) {
-	return nil, 0, sm.Errorf(sm.ENOTIMPLEMENTED, "")
+	tx := s.db.BeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	return findUsers(ctx, tx, filter)
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, id uint, up sm.UserUpdate) (*sm.User, error) {
@@ -142,11 +165,11 @@ func findUsers(ctx context.Context, tx *Tx, filter sm.UserFilter) (_ []*sm.User,
 			&user.Name,
 			&user.Email,
 			&user.Password,
-			&user.Avatar,
-			&user.Location,
-			&user.Bio,
-			&user.Interests,
-			&user.Role,
+			(*NullString)(&user.Avatar),
+			(*NullString)(&user.Location),
+			(*NullString)(&user.Bio),
+			(*NullString)(&user.Interests),
+			(*NullString)(&user.Role),
 			&user.IsEmailVerified,
 			(*NullTime)(&user.CreatedAt),
 			(*NullTime)(&user.UpdatedAt),

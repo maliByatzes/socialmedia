@@ -114,8 +114,16 @@ func (s *Server) signin() gin.HandlerFunc {
 
 		user, err := s.UserService.Authenticate(c.Request.Context(), req.User.Email, req.User.Password)
 		if err != nil || user == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid credentials",
+			if sm.ErrorCode(err) == sm.ENOTAUTHORIZED {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": sm.ErrorMessage(err),
+				})
+				return
+			}
+
+			log.Printf("ERROR <signin> - authenticating the user: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
 			})
 			return
 		}

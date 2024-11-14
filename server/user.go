@@ -49,8 +49,8 @@ func (u *User) SetPassword(password string) error {
 	return nil
 }
 
-func (u *User) VerifyPassword(password string, hashedPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+func (u *User) VerifyPassword(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 }
 
 type UserService interface {

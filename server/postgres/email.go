@@ -94,10 +94,10 @@ func findEmailVerifications(ctx context.Context, tx *Tx, filter sm.EmailFilter) 
 		var email sm.Email
 		if err := rows.Scan(
 			&email.ID,
-			&email.Email,
-			&email.VerificationCode,
-			&email.MessageID,
-			&email.For,
+			(*NullString)(&email.Email),
+			(*NullString)(&email.VerificationCode),
+			(*NullString)(&email.MessageID),
+			(*NullString)(&email.For),
 			(*NullTime)(&email.CreatedAt),
 			(*NullTime)(&email.ExpiresAt),
 			&n,

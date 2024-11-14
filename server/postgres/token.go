@@ -83,8 +83,8 @@ func findTokens(ctx context.Context, tx *Tx, filter sm.TokenFilter) (_ []*sm.Tok
 		if err := rows.Scan(
 			&token.ID,
 			&token.UserID,
-			&token.RefreshToken,
-			&token.AccessToken,
+			(*NullString)(&token.RefreshToken),
+			(*NullString)(&token.AccessToken),
 			(*NullTime)(&token.CreatedAt),
 			(*NullTime)(&token.UpdatedAt),
 			&n,
