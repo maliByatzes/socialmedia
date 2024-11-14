@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand/v2"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	sm "github.com/maliByatzes/socialmedia"
@@ -154,7 +155,7 @@ func verifyLoginHTML(name, verificationLink, blockLink string, currentContextDat
       <div style="background-color: #fff; padding: 20px; border-radius: 10px;">
         <h1 style="color: black; font-size: 24px; margin-bottom: 20px;">New login attempt detected</h1>
         <p>Dear %s,</p>
-        <p>Our system has detected that a new login was attempted from the following device and location at ${currentContextData.time}:</p>
+        <p>Our system has detected that a new login was attempted from the following device and location at %s:</p>
         <ul style="list-style: none; padding-left: 0;">
           <li><strong>IP Address:</strong> %s</li>
           <li><strong>Location:</strong> %s, %s</li>
@@ -175,6 +176,7 @@ func verifyLoginHTML(name, verificationLink, blockLink string, currentContextDat
       </div>
     </div>
 	`, name,
+		time.Now().Local().UTC().Format(time.RFC3339),
 		currentContextData.IP,
 		currentContextData.City,
 		currentContextData.Country,

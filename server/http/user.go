@@ -179,3 +179,66 @@ func (s *Server) signin() gin.HandlerFunc {
 		})
 	}
 }
+
+func (s *Server) getCurrentUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := sm.UserFromContext(c.Request.Context())
+		if user == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "user not found",
+			})
+			return
+		}
+
+		// TODO: Return more info about the user here...
+
+		c.JSON(http.StatusOK, gin.H{
+			"user": user,
+		})
+	}
+}
+
+func (s *Server) logout() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var accessToken string
+
+		if v := c.GetHeader("Authorization"); strings.HasPrefix(v, "Bearer ") {
+			accessToken = strings.TrimPrefix(v, "Bearer ")
+		}
+
+		if accessToken != "" {
+			tk, _, err := s.TokenService.FindTokens(c.Request.Context(), sm.TokenFilter{AccessToken: &accessToken})
+			if err != nil {
+				log.Printf("ERROR <logout> - finding token from db: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Internal Server Error",
+				})
+				return
+			} else if len(tk) == 0 {
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": "Token not found",
+				})
+				return
+			}
+
+			if err := s.TokenService.DeleteToken(c.Request.Context(), tk[0].ID); err != nil {
+				if sm.ErrorCode(err) == sm.ENOTAUTHORIZED {
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"error": sm.ErrorMessage(err),
+					})
+					return
+				}
+
+				log.Printf("ERROR <logout> - deleting token from db: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Internal Server Error",
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Logout successful",
+			})
+		}
+	}
+}

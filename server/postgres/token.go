@@ -45,6 +45,17 @@ func (s *TokenService) CreateToken(ctx context.Context, token *sm.Token) error {
 	return tx.Commit()
 }
 
+func (s *TokenService) DeleteToken(ctx context.Context, id uint) error {
+	tx := s.db.BeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	if err := deleteToken(ctx, tx, id); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func findTokenByID(ctx context.Context, tx *Tx, id uint) (*sm.Token, error) {
 	a, _, err := findTokens(ctx, tx, sm.TokenFilter{ID: &id})
 	if err != nil {
@@ -66,6 +77,16 @@ func findTokens(ctx context.Context, tx *Tx, filter sm.TokenFilter) (_ []*sm.Tok
 
 	if v := filter.UserID; v != nil {
 		where, args = append(where, fmt.Sprintf(`"user_id" = $%d`, argPos)), append(args, *v)
+		argPos++
+	}
+
+	if v := filter.AccessToken; v != nil {
+		where, args = append(where, fmt.Sprintf(`"access_token" = $%d`, argPos)), append(args, *v)
+		argPos++
+	}
+
+	if v := filter.RefreshToken; v != nil {
+		where, args = append(where, fmt.Sprintf(`"refresh_token" = $%d`, argPos)), append(args, *v)
 	}
 
 	query := `SELECT "id", "user_id", "refresh_token", "access_token", "created_at", "updated_at", COUNT(*) OVER()
@@ -116,6 +137,22 @@ func createToken(ctx context.Context, tx *Tx, token *sm.Token) error {
 	}
 
 	if err := tx.QueryRowxContext(ctx, query, args...).Scan(&token.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteToken(ctx context.Context, tx *Tx, id uint) error {
+	if user, err := findUserByID(ctx, tx, id); err != nil {
+		return err
+	} else if user.ID != sm.UserIDFromContext(ctx) {
+		return sm.Errorf(sm.ENOTAUTHORIZED, "You are not allowed to delete this user.")
+	}
+
+	query := `DELETE FROM "tokens" WHERE id = $1`
+
+	if _, err := tx.ExecContext(ctx, query, id); err != nil {
 		return err
 	}
 
