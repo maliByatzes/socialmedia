@@ -42,7 +42,7 @@ func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 			sender := mail.NewGmailSender("SocialMedia", cfg.Email, cfg.EmailPassword)
 			content := verifyEmailHTML(string(name), verificationLink, verificationCode)
 			if err := sender.SendEmail("Verify your email address", content, []string{email}, nil, nil); err != nil {
-				log.Printf("error sending an email: %v", err)
+				log.Printf("ERROR <sendVerificationEmail> - sending email to user: %v", err)
 				/*contextCopy.JSON(http.StatusInternalServerError, gin.H{
 					"error": "Internal Server Error",
 				})*/
@@ -56,7 +56,7 @@ func (s *Server) sendVerificationEmail() gin.HandlerFunc {
 			}
 
 			if err := s.EmailService.CreateEmailVerification(bgCtx, &newEmailVerification); err != nil {
-				log.Printf("error in create email verification: %v", err)
+				log.Printf("ERROR <sendVerificationEmail> - creating new email verification on db: %v", err)
 				/*c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "Internal Server Error",
 				})*/
@@ -102,7 +102,7 @@ func (s *Server) sendLoginVerificationEmail() gin.HandlerFunc {
 			content := verifyLoginHTML(name, verificationLink, blockLink, currentContextData)
 
 			if err := sender.SendEmail("Action Required: Verify Recent Login", content, []string{email}, nil, nil); err != nil {
-				log.Printf("error sending an email: %v", err)
+				log.Printf("ERROR <sendLoginVerificationEmail> - sending email to user: %v", err)
 				/*c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "Internal Server Error",
 				})*/
@@ -116,7 +116,7 @@ func (s *Server) sendLoginVerificationEmail() gin.HandlerFunc {
 			}
 
 			if err := s.EmailService.CreateEmailVerification(bgCtx, &newEmailVerification); err != nil {
-				log.Printf("error in create email verification: %v", err)
+				log.Printf("ERROR <sendLoginVerificationEmail> - creating new email verificatio on db: %v", err)
 				/*c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "Internal Server Error",
 				})*/

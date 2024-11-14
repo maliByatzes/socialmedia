@@ -48,7 +48,7 @@ func (s *Server) requireAuth() gin.HandlerFunc {
 				return
 			}
 
-			log.Printf("error in requireAuth: %v", err)
+			log.Printf("ERROR <requireAuth> - finding user by id: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})

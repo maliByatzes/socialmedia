@@ -53,7 +53,13 @@ func (s *Server) addUser() gin.HandlerFunc {
 			role = "general"
 		}
 
-		newUser.SetPassword(req.User.Password)
+		if err := newUser.SetPassword(req.User.Password); err != nil {
+			log.Printf("ERROR <addUser> - setting password: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
 		newUser.Role = role
 		newUser.Avatar = avatar
 
@@ -65,7 +71,7 @@ func (s *Server) addUser() gin.HandlerFunc {
 				return
 			}
 
-			log.Printf("error in create user handler: %v", err)
+			log.Printf("ERROR <addUser> - creating new user on db: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -122,7 +128,7 @@ func (s *Server) signin() gin.HandlerFunc {
 			time.Hour*6,
 		)
 		if err != nil {
-			log.Printf("error in signin: %v", err)
+			log.Printf("ERROR <signin> - creating access token: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -135,7 +141,7 @@ func (s *Server) signin() gin.HandlerFunc {
 			time.Hour*168,
 		)
 		if err != nil {
-			log.Printf("error in signin: %v", err)
+			log.Printf("ERROR <signin> - creating refresh token: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -147,7 +153,7 @@ func (s *Server) signin() gin.HandlerFunc {
 			RefreshToken: refreshToken,
 			AccessToken:  accessToken,
 		}); err != nil {
-			log.Printf("error in create token in signin: %v", err)
+			log.Printf("ERROR <signin> - creating new token on db: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})

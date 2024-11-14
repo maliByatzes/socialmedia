@@ -73,7 +73,7 @@ func (s *Server) getAuthContextData() gin.HandlerFunc {
 				return
 			}
 
-			log.Printf("error in getAuthContextData: %v\n", err)
+			log.Printf("ERROR <getAuthContextData> - finding context by id: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -107,7 +107,7 @@ func (s *Server) getTrustedAuthContextData() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Printf("error in getAuthContextData: %v\n", err)
+			log.Printf("ERROR <getAuthContextData> - finding suspicous logins: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -142,7 +142,7 @@ func (s *Server) getBlockedAuthContextData() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Printf("error in getAuthContextData: %v\n", err)
+			log.Printf("ERROR <getBlockedAuthContextData> - finding suspicous logins: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -177,7 +177,7 @@ func (s *Server) getUserPreferences() gin.HandlerFunc {
 				return
 			}
 
-			log.Printf("error in getUserPreferences: %v\n", err)
+			log.Printf("ERROR <getUserPreferences> - finding preference by id: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -212,7 +212,7 @@ func (s *Server) deleteContextAuthData() gin.HandlerFunc {
 		}
 
 		if err := s.SuspiciousLoginService.DeleteSL(c.Request.Context(), uint(contextID)); err != nil {
-			log.Printf("error in deleteContextAuthData: %v\n", err)
+			log.Printf("ERROR <deleteContextAuthData> - deleting suspicous login from db: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -254,7 +254,7 @@ func (s *Server) blockContextAuthData() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Printf("error in blockContextAuthData: %v\n", err)
+			log.Printf("ERROR <blockContextAuthData> - updating suspicous login in db: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
@@ -296,7 +296,7 @@ func (s *Server) unblockContextAuthData() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Printf("error in blockContextAuthData: %v\n", err)
+			log.Printf("ERROR <unblockContextAuthData> - updating suspicous login in db: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal Server Error",
 			})
