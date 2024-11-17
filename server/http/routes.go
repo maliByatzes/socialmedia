@@ -17,5 +17,12 @@ func (s *Server) routes() {
 			s.signin()(c)
 			s.sendLoginVerificationEmail()(c)
 		}))
+
+		apiRouter.Use(s.requireAuth())
+		{
+			apiRouter.GET("/users/me", s.getCurrentUser())
+			apiRouter.PATCH("/users/update", s.updateUserInfo())
+			apiRouter.POST("/users/logout", s.logout())
+		}
 	}
 }

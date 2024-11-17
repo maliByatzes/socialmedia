@@ -44,6 +44,9 @@ func (s *TokenService) CreateToken(ctx context.Context, token *sm.Token) error {
 
 	return tx.Commit()
 }
+func (s *TokenService) UpdateToken(ctx context.Context, id uint, upd sm.TokenUpdate) (*sm.Token, error) {
+	return nil, nil
+}
 
 func (s *TokenService) DeleteToken(ctx context.Context, id uint) error {
 	tx := s.db.BeginTx(ctx, nil)
@@ -144,9 +147,9 @@ func createToken(ctx context.Context, tx *Tx, token *sm.Token) error {
 }
 
 func deleteToken(ctx context.Context, tx *Tx, id uint) error {
-	if user, err := findUserByID(ctx, tx, id); err != nil {
+	if tk, err := findTokenByID(ctx, tx, id); err != nil {
 		return err
-	} else if user.ID != sm.UserIDFromContext(ctx) {
+	} else if tk.UserID != sm.UserIDFromContext(ctx) {
 		return sm.Errorf(sm.ENOTAUTHORIZED, "You are not allowed to delete this user.")
 	}
 
