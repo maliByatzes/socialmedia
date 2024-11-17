@@ -242,3 +242,134 @@ func (s *Server) logout() gin.HandlerFunc {
 		}
 	}
 }
+
+func (s *Server) refreshToken() gin.HandlerFunc {
+	var req struct {
+		Body struct {
+			RefreshToken string `json:"refresh_token"`
+		} `json:"body" binding:"required"`
+	}
+
+	return func(c *gin.Context) {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		tks, _, err := s.TokenService.FindTokens(c.Request.Context(), sm.TokenFilter{RefreshToken: &req.Body.RefreshToken})
+		if err != nil {
+			log.Printf("ERROR <refreshToken> - getting token from db: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		} else if len(tks) == 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid refresh token.",
+			})
+			return
+		}
+
+		user, err := s.UserService.FindUserByID(c.Request.Context(), tks[0].UserID)
+		if err != nil {
+			if sm.ErrorCode(err) == sm.ENOTFOUND {
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": sm.ErrorMessage(err),
+				})
+				return
+			}
+
+			log.Printf("ERROR <refreshToken> - getting user from db: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		payload, err := s.TokenMaker.VerifyToken(tks[0].RefreshToken)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		if payload.ExpiresAt.After(time.Now()) {
+			s.TokenService.DeleteToken(c.Request.Context(), tks[0].ID)
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Expired token.",
+			})
+			return
+		}
+
+		accessToken, _, err := s.TokenMaker.CreateToken(
+			user.ID,
+			user.Name,
+			time.Hour*6,
+		)
+		if err != nil {
+			log.Printf("ERROR <refreshToken> - creating access token: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"accessToken":          accessToken,
+			"refreshToken":         tks[0].RefreshToken,
+			"accessTokenUpdatedAt": time.Now().Local(),
+		})
+	}
+}
+
+func (s *Server) getModeratorProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {}
+}
+
+func (s *Server) updateUserInfo() gin.HandlerFunc {
+	var req struct {
+		Body struct {
+			Location  string `json:"location"`
+			Interests string `json:"interests"`
+			Bio       string `json:"bio"`
+		} `json:"body" binding:"required"`
+	}
+
+	return func(c *gin.Context) {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		user := sm.UserFromContext(c.Request.Context())
+		if user == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "user not found",
+			})
+			return
+		}
+
+		updatedUser, err := s.UserService.UpdateUser(c.Request.Context(), user.ID, sm.UserUpdate{
+			Location:  &req.Body.Location,
+			Interests: &req.Body.Interests,
+			Bio:       &req.Body.Bio,
+		})
+		if err != nil {
+			log.Printf("ERROR <updateUserInfo> - updating user info to db: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message":     "User info updated successfully",
+			"updatedUser": updatedUser,
+		})
+	}
+}
