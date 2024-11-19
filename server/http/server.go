@@ -26,6 +26,7 @@ type Server struct {
 	SuspiciousLoginService sm.SuspiciousLoginService
 	TokenService           sm.TokenService
 	RelationshipService    sm.RelationshipService
+	PostService            sm.PostService
 }
 
 func NewServer(db *postgres.DB, secretKey string) (*Server, error) {
@@ -52,6 +53,7 @@ func NewServer(db *postgres.DB, secretKey string) (*Server, error) {
 	s.SuspiciousLoginService = postgres.NewSuspiciousLoginService(db)
 	s.TokenService = postgres.NewTokenService(db)
 	s.RelationshipService = postgres.NewRelationshipService(db)
+	s.PostService = postgres.NewPostService(db)
 	s.Server.Handler = s.Router
 
 	return &s, nil

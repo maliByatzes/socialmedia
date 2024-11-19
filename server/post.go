@@ -24,18 +24,15 @@ type PostService interface {
 }
 
 type PostFilter struct {
-	ID          *uint   `json:"id"`
-	Content     *string `json:"content"`
-	FileURL     *string `json:"file_url"`
-	CommunityID *uint   `json:"community_id"`
-	UserID      *uint   `json:"user_id"`
+	ID          *uint `json:"id"`
+	CommunityID *uint `json:"community_id"`
+	UserID      *uint `json:"user_id"`
 
 	Limit  int `json:"limit"`
 	Offset int `json:"offset"`
 }
 
 type PostUpdate struct {
-	Content     *string `json:"content"`
-	FileURL     *string `json:"file_url"`
-	CommunityID *uint   `json:"community_id"`
+	Content *string `json:"content"`
+	FileURL *string `json:"file_url"`
 }
