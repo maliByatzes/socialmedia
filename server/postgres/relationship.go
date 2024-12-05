@@ -85,7 +85,7 @@ func findRelationships(ctx context.Context, tx *Tx, filter sm.RelationshipFilter
 	}
 
 	query := `SELECT "id", "follower_id", "following_id", "created_at", "updated_at", COUNT(*) OVER()
-	FROM "relationships"` + formatWhereClause(where) + ` ORDER BY id ASC` + formatLimitOffset(filter.Limit, filter.Offset)
+		FROM "relationships"` + formatWhereClause(where) + ` ORDER BY id ASC` + formatLimitOffset(filter.Limit, filter.Offset)
 
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
